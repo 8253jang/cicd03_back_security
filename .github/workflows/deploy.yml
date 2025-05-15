@@ -64,6 +64,9 @@ jobs:
           echo "docker-compose.yml 내용:"
           cat docker-compose.yml || echo "docker-compose.yml 파일 없음"
 
+      - name: 테스트 - tar로 수동 압축 시도
+        run: tar -cvf test.tar docker-compose.yml .env
+        
       # 9. docker-compose.yml 전송
       - name: docker-compose.yml 전송
         uses: appleboy/scp-action@v0.1.7
@@ -76,8 +79,7 @@ jobs:
             ${{ github.workspace }}/.env
           target: "~/cicd-docker/"
 
-      - name: 테스트 - tar로 수동 압축 시도
-        run: tar -cvf test.tar docker-compose.yml .env
+
 
       # 10. EC2에서 컨테이너 실행
       - name: EC2에서 컨테이너 실행
