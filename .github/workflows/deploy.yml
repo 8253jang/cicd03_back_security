@@ -15,8 +15,8 @@ jobs:
         uses: actions/checkout@v4
 
       # 2. Spring Boot 설정 파일(application.properties) 생성
-      - name: Create application.properties
-        run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
+      # - name: Create application.properties
+      #  run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
 
       # 3. .env 파일 생성 (줄바꿈 처리)
       - name: .env 파일 생성
