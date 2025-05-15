@@ -1,7 +1,5 @@
-# GitHub Actions 워크플로우 이름
 name: Docker 컨테이너로 EC2에 배포하기
 
-# main 브랜치에 push가 발생하면 이 워크플로우 실행
 on:
   push:
     branches:
@@ -9,33 +7,29 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub 제공 Ubuntu 환경에서 실행
+    runs-on: ubuntu-latest
 
     steps:
       # 1. GitHub 저장소 코드 가져오기
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2. Spring Boot 설정 파일(application.properties)을 생성
+      # 2. Spring Boot 설정 파일(application.properties) 생성
       - name: Create application.properties
         run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
 
-      # 3. docker-compose.yml 파일 생성
-      # - name: Create docker-compose.yml 생성
-      #  run: echo "${{secrets.DOCKER_COMPOSE}}" > ./docker-compose.yml
-
-      # 4. .env 파일 생성
+      # 3. .env 파일 생성 (줄바꿈 처리)
       - name: .env 파일 생성
         run: |
           cat <<EOF > .env
           ${{ secrets.ENV_FILE }}
           EOF
 
-      # 4. mvnw 실행 권한 부여
+      # 4. Gradle Wrapper 실행 권한 부여
       - name: mvnw 실행 권한 부여
         run: chmod +x ./mvnw
 
-      # 5. 프로젝트 빌드 (테스트 생략)
+      # 5. 프로젝트 빌드
       - name: Maven 빌드 실행
         run: ./mvnw clean package -DskipTests
 
@@ -50,38 +44,33 @@ jobs:
       - name: Docker 이미지 빌드
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/jwt-app:latest .
 
-      # 8. Docker Hub에 이미지 푸시
+      # 8. Docker 이미지 푸시
       - name: Docker 이미지 푸시
         run: docker push ${{ secrets.DOCKER_USERNAME }}/jwt-app:latest
 
-      # 파일확인
-      - name: 파일 확인 (.env, docker-compose.yml)
+      # 9. EC2 키파일 생성
+      - name: EC2 Key 생성
         run: |
-          echo "현재 디렉토리 목록:"
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      # 10. 파일 확인 및 디버그 로그 출력
+      - name: 파일 확인 및 내용 출력
+        run: |
+          echo " 디렉토리 목록:"
           ls -al
           echo " .env 내용:"
-          cat .env || echo ".env 파일 없음"
-          echo "docker-compose.yml 내용:"
-          cat docker-compose.yml || echo "docker-compose.yml 파일 없음"
+          cat .env
+          echo " docker-compose.yml 내용:"
+          cat docker-compose.yml
 
-      - name: 테스트 - tar로 수동 압축 시도
-        run: tar -cvf test.tar docker-compose.yml .env
+      # 11. scp를 이용한 파일 전송 (직접 전송)
+      - name: docker-compose.yml과 .env 직접 전송
+        run: |
+          scp -i key.pem -o StrictHostKeyChecking=no docker-compose.yml .env ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/cicd-docker/
+        shell: bash
 
-      # 9. docker-compose.yml 전송
-      - name: docker-compose.yml 전송
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: |
-            docker-compose.yml
-            .env
-          target: "~/cicd-docker/"
-
-
-
-      # 10. EC2에서 컨테이너 실행
+      # 12. EC2에서 Docker Compose 실행
       - name: EC2에서 컨테이너 실행
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -90,8 +79,6 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            # mkdir -p ~/cicd-docker  # 배포 디렉토리 생성 (이미 있으면 무시)
             cd ~/cicd-docker
-            # Spring Boot 컨테이너만 재시작
-            docker compose pull boot                # boot만 최신 이미지로 pull
-            docker compose up -d --no-deps --force-recreate boot  # mysql 영향 없이 boot만 recreate
+            docker compose pull boot
+            docker compose up -d --no-deps --force-recreate boot
