@@ -54,6 +54,16 @@ jobs:
       - name: Docker 이미지 푸시
         run: docker push ${{ secrets.DOCKER_USERNAME }}/jwt-app:latest
 
+      # 파일확인
+      - name: 파일 확인 (.env, docker-compose.yml)
+        run: |
+          echo "현재 디렉토리 목록:"
+          ls -al
+          echo " .env 내용:"
+          cat .env || echo ".env 파일 없음"
+          echo "docker-compose.yml 내용:"
+          cat docker-compose.yml || echo "docker-compose.yml 파일 없음"
+
       # 9. docker-compose.yml 전송
       - name: docker-compose.yml 전송
         uses: appleboy/scp-action@v0.1.7
