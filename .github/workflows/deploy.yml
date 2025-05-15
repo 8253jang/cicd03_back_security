@@ -72,8 +72,8 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: |
-            docker-compose.yml
-            .env
+            ${{ github.workspace }}/docker-compose.yml
+            ${{ github.workspace }}/.env
           target: "~/cicd-docker/"
 
       # 10. EC2에서 컨테이너 실행
