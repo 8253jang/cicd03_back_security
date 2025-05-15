@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql_db
+    restart: always
+    env_file:
+      - .env  # ← 환경변수 파일을 별도로 관리
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+
+  boot:
+    image: jangheejung/jwt-app:latest
+    container_name: jwt_app
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+
+volumes:
+  dbdata:
