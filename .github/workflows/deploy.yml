@@ -80,5 +80,9 @@ jobs:
           script_stop: true
           script: |
             cd ~/cicd-docker
-            docker compose pull boot
-            docker compose up -d --no-deps --force-recreate boot
+            docker-compose down || true  # 기존 컨테이너 중지 (실패해도 계속)
+            docker-compose pull          # 최신 이미지 가져오기
+            docker-compose up -d         # 백그라운드에서 컨테이너 실행
+            
+            # docker compose pull boot
+            # docker compose up -d --no-deps --force-recreate boot
