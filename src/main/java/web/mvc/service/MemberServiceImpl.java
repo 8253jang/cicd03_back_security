@@ -23,7 +23,8 @@ public class MemberServiceImpl implements  MemberService{
     @Override
     public String duplicateCheck(String id) {
         Member member = memberRepository.duplicateCheck(id);
-        System.out.println("member = " + member);
+        System.out.println("member 정보 = " + member);
+        
         if(member==null) return "사용가능합니다.";
         else return "중복입니다.";
 
