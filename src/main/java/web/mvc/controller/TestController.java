@@ -11,7 +11,7 @@ public class TestController {
     @GetMapping("/test")
     public String test(){
         log.info("test요청됨....");
-        return "spring Security 시작!";
+        return "spring Security OK 시작! 잘되는지 궁금해요~";
     }
 
 }
