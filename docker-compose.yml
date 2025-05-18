@@ -1,20 +1,26 @@
+version: '3.3'
 
 services:
   springboot-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: springboot-app
+    image: ${DOCKER_USERNAME}/jwt-app:latest
+    container_name: jwt_app
     ports:
       - "8080:8080"
     environment:
+      SPRING_JWT_SECRET: ${SPRING_JWT_SECRET}
       MYSQL_URL: ${MYSQL_URL}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      SPRING_JWT_SECRET: ${SPRING_JWT_SECRET}
     networks:
       - mynet
-    restart: always
+    depends_on:
+      - dummy_mysql
+
+  dummy_mysql:
+    image: hello-world
+    entrypoint: ["true"]
+    networks:
+      - mynet
 
 networks:
   mynet:
