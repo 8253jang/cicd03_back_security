@@ -26,8 +26,9 @@ public class MemberController {
 
     //중복체크
     @GetMapping("/members/{id}")
-    public String duplicateIdCheck(@PathVariable String id){
+    public Member duplicateIdCheck(@PathVariable String id){
         System.out.println("id = " + id);
         return memberService.duplicateCheck(id);
+
     }
 }

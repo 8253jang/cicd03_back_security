@@ -5,7 +5,7 @@ import web.mvc.domain.Member;
 
 public interface MemberService {
 
-    String duplicateCheck(String id);
+    Member duplicateCheck(String id);
 
     /**
      * 가입
