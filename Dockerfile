@@ -8,4 +8,4 @@ FROM openjdk:17-jdk-slim
 COPY target/*SNAPSHOT.jar app.jar
 
 # 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-Dfile.encoding=UTF-8", "-jar", "/app.jar"]
