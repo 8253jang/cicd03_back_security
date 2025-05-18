@@ -11,7 +11,7 @@ services:
       MYSQL_URL: ${MYSQL_URL}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"  #  추가된 부분
+      JAVA_TOOL_OPTIONS: "-Duser.timezone=Asia/Seoul -Dfile.encoding=UTF-8"
     networks:
       - mynet
 
