@@ -1,25 +1,21 @@
-version: "3"
 
 services:
-  mysql:
-    image: mysql:8.4
-    container_name: mysql_db
-    restart: always
-    env_file:
-      - .env  # ← 환경변수 파일을 별도로 관리
-    ports:
-      - "3306:3306"
-    volumes:
-      - dbdata:/var/lib/mysql
-      - /etc/localtime:/etc/localtime:ro
-
-  boot:
-    image: jangheejung/jwt-app:latest
-    container_name: jwt_app
-    depends_on:
-      - mysql
+  springboot-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: springboot-app
     ports:
       - "8080:8080"
+    environment:
+      MYSQL_URL: ${MYSQL_URL}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_JWT_SECRET: ${SPRING_JWT_SECRET}
+    networks:
+      - mynet
+    restart: always
 
-volumes:
-  dbdata:
+networks:
+  mynet:
+    external: true

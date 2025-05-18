@@ -1,88 +1,42 @@
-name: Docker 컨테이너로 EC2에 배포하기
+name: Deploy to EC2 with Docker Compose
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. GitHub 저장소 코드 가져오기
-      - name: Checkout source
-        uses: actions/checkout@v4
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-      # 2. Spring Boot 설정 파일(application.properties) 생성
-      # - name: Create application.properties
-      #  run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
-
-      # 3. .env 파일 생성 (줄바꿈 처리)
-      - name: .env 파일 생성
-        run: |
-          cat <<EOF > .env
-          ${{ secrets.ENV_FILE }}
-          EOF
-
-      # 4. Gradle Wrapper 실행 권한 부여
-      - name: mvnw 실행 권한 부여
-        run: chmod +x ./mvnw
-
-      # 5. 프로젝트 빌드
-      - name: Maven 빌드 실행
-        run: ./mvnw clean package -DskipTests
-
-      # 6. Docker Hub 로그인
-      - name: Docker Hub 로그인
-        uses: docker/login-action@v3
+      - name: Copy project to EC2
+        uses: appleboy/scp-action@v0.1.4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "."
+          target: "~/back_security"
 
-      # 7. Docker 이미지 빌드
-      - name: Docker 이미지 빌드
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/jwt-app:latest .
-
-      # 8. Docker 이미지 푸시
-      - name: Docker 이미지 푸시
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/jwt-app:latest
-
-      # 9. EC2 키파일 생성
-      - name: EC2 Key 생성
-        run: |
-          echo "${{ secrets.EC2_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
-
-      # 10. 파일 확인 및 디버그 로그 출력
-      - name: 파일 확인 및 내용 출력
-        run: |
-          echo " 디렉토리 목록:"
-          ls -al
-          echo " .env 내용:"
-          cat .env
-          echo " docker-compose.yml 내용:"
-          cat docker-compose.yml
-
-      # 11. scp를 이용한 파일 전송 (직접 전송)
-      - name: docker-compose.yml과 .env 직접 전송
-        run: |
-          scp -i key.pem -o StrictHostKeyChecking=no docker-compose.yml .env ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/cicd-docker/
-        shell: bash
-
-      # 12. EC2에서 Docker Compose 실행
-      - name: EC2에서 컨테이너 실행
+      - name: Deploy on EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          script_stop: true
           script: |
-            cd ~/cicd-docker
-            docker-compose down || true  # 기존 컨테이너 중지 (실패해도 계속)
-            docker-compose pull          # 최신 이미지 가져오기
-            docker-compose up -d         # 백그라운드에서 컨테이너 실행
-            
-            # docker compose pull boot
-            # docker compose up -d --no-deps --force-recreate boot
+            cd ~/back_security
+
+            # .env 생성
+            echo "MYSQL_URL=${{ secrets.MYSQL_URL }}" > .env
+            echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+            echo "SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}" >> .env
+
+            # 기존 컨테이너 정리 및 재배포
+            docker compose down || true
+            docker compose build
+            docker compose up -d
