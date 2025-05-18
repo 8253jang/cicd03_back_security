@@ -1,4 +1,3 @@
-version: '3.3'
 
 services:
   springboot-app:
@@ -17,11 +16,12 @@ services:
       - dummy_mysql
 
   dummy_mysql:
-    image: hello-world
-    entrypoint: ["true"]
+    image: alpine
+    command: sleep 10
     networks:
       - mynet
 
 networks:
   mynet:
     external: true
+
