@@ -40,10 +40,12 @@ jobs:
       # ✅ .env 파일 동적 생성
       - name: .env 파일 생성
         run: |
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > .env
-        #  echo "SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}" >> .env
+          echo "SPRING_JWT_SECRET=${{ secrets.SPRING_JWT_SECRET }}" >> .env
+          echo "MYSQL_URL=${{ secrets.MYSQL_URL }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> .env
 
-      # ✅ docker-compose.yml + .env 전송
       - name: EC2에 docker-compose.yml + .env 전송
         uses: appleboy/scp-action@v0.1.7
         with:
