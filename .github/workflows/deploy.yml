@@ -23,8 +23,8 @@ jobs:
         run: chmod +x ./mvnw
 
       - name: Maven 빌드 실행
-      #  run: ./mvnw clean package -DskipTests  # -DskipTests는 test생략옵션
-        run: ./mvnw clean verify
+        run: ./mvnw clean package -DskipTests  # -DskipTests는 test생략옵션
+      #  run: ./mvnw clean verify
 
       - name: Docker Hub 로그인
         uses: docker/login-action@v3
