@@ -13,14 +13,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     networks:
       - mynet
-    depends_on:
-      - dummy_mysql
-
-  dummy_mysql:
-    image: alpine
-    command: sleep 10
-    networks:
-      - mynet
 
 networks:
   mynet:
