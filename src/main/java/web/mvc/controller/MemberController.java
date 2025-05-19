@@ -25,10 +25,14 @@ public class MemberController {
     }
 
     //중복체크
-    @GetMapping("/members/{id}")
-    public Member duplicateIdCheck(@PathVariable String id){
+    @GetMapping(value = "/members/{id}", produces = "text/plain;charset=UTF-8")
+    public String duplicateIdCheck(@PathVariable String id){
         System.out.println("id = " + id);
-        return memberService.duplicateCheck(id);
+        //return memberService.duplicateCheck(id);
+
+        String result = memberService.duplicateCheck(id);
+        return result;
+       // return ResponseEntity.status(HttpStatus.OK).body(result);
 
     }
 }

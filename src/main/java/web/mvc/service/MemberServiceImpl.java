@@ -21,13 +21,13 @@ public class MemberServiceImpl implements  MemberService{
 
     @Transactional(readOnly = true)
     @Override
-    public Member duplicateCheck(String id) {
+    public String duplicateCheck(String id) {
         Member member = memberRepository.duplicateCheck(id);
         System.out.println("member 정보 = " + member);
         
-        //if(member==null) return "사용가능합니다.";
-        //else return "중복입니다.";
-        return member;
+        if(member==null) return "사용가능합니다.";
+        else return "중복입니다.";
+        //return member;
 
     }
 
