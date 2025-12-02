@@ -1,5 +1,5 @@
 # 1. OpenJDK 17 기반의 슬림 이미지 사용 (필수 최소 구성만 포함)
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
 # 2. 컨테이너 내에서 앱이 실행될 디렉토리 지정
 WORKDIR /app
